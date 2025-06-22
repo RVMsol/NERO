@@ -12,7 +12,7 @@
             // Office is ready
         });
 
-```
+
     function reportPhishing(args) {
         Office.context.mailbox.item.getAllInternetHeadersAsync(function(result) {
             if (result.status === Office.AsyncResultStatus.Succeeded) {
@@ -163,7 +163,7 @@
     // Make function available globally
     window.reportPhishing = reportPhishing;
 </script>
-```
+
 
 </body>
 </html>
