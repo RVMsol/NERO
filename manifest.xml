@@ -12,7 +12,7 @@ Changes: Based on official Microsoft MailApp template
 
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="MailApp">
   <Id>a1b2c3d4-e5f6-7890-abcd-123456789012</Id>
-  <Version>3.3.0.0</Version>
+  <Version>3.4.0.0</Version>
   <ProviderName>Nero Consulting</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="Report Phishing"/>
