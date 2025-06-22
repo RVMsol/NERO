@@ -7,10 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
 ```
-<!-- Office JavaScript API -->
 <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
 
-<!-- Fabric UI Core for consistent styling -->
 <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/9.6.1/css/fabric.min.css">
 
 <style>
@@ -146,7 +144,6 @@
 </head>
 <body>
     <div class="header">
-        <!-- Custom phishing icon -->
         <img class="phishing-icon" src="https://rvmsol.github.io/NERO/assets/phishing-icon-48.png" alt="Phishing Report Icon">
 
 ```
@@ -158,14 +155,14 @@
 
 <div class="warning-box">
     <div class="warning-text">
-        <strong>⚠️ Important:</strong> Only use this button if you believe this email is a phishing attempt or malicious. 
+        <strong>Warning:</strong> Only use this button if you believe this email is a phishing attempt or malicious. 
         The email will be permanently removed from your inbox and forwarded to killphish@nero-consulting.com for analysis.
     </div>
 </div>
 
 <div class="action-buttons">
     <button id="reportButton" class="report-button" onclick="reportPhishingEmail()">
-        🛡️ Report as Phishing
+        Report as Phishing
     </button>
     
     <div class="loading-spinner" id="loadingSpinner"></div>
@@ -187,13 +184,11 @@
         var loadingSpinner = document.getElementById('loadingSpinner');
         var statusMessage = document.getElementById('statusMessage');
         
-        // Disable button and show loading
         reportButton.disabled = true;
         reportButton.textContent = 'Reporting...';
         loadingSpinner.style.display = 'block';
         statusMessage.style.display = 'none';
         
-        // Get the current email
         Office.context.mailbox.item.getAllInternetHeadersAsync(function(result) {
             if (result.status === Office.AsyncResultStatus.Succeeded) {
                 var headers = result.value;
@@ -203,18 +198,14 @@
                 var sender = item.sender ? item.sender.emailAddress : 'Unknown';
                 var receivedTime = item.dateTimeCreated;
                 
-                // Get email body
                 item.body.getAsync(Office.CoercionType.Html, function(bodyResult) {
                     if (bodyResult.status === Office.AsyncResultStatus.Succeeded) {
                         var emailBody = bodyResult.value;
                         
-                        // Create the report
                         var reportContent = createPhishingReport(subject, sender, receivedTime, emailBody, headers);
                         
-                        // Send the report
                         sendReport(reportContent, subject, function(success) {
                             if (success) {
-                                // Move email to deleted items
                                 moveEmailToDeleted(function(moveSuccess) {
                                     showStatus(moveSuccess ? 'success' : 'partial-success');
                                     setTimeout(() => {
@@ -241,20 +232,20 @@
     function createPhishingReport(subject, sender, receivedTime, body, headers) {
         return `
             <div style="font-family: Arial, sans-serif;">
-                <h3 style="color: #d13438;">🚨 PHISHING EMAIL REPORT</h3>
+                <h3 style="color: #d13438;">PHISHING EMAIL REPORT</h3>
                 <p><strong>Reported by:</strong> ${Office.context.mailbox.userProfile.displayName} (${Office.context.mailbox.userProfile.emailAddress})</p>
                 <p><strong>Report Time:</strong> ${new Date().toLocaleString()}</p>
                 <hr style="margin: 20px 0;">
                 
-                <h4>📧 Original Email Details:</h4>
+                <h4>Original Email Details:</h4>
                 <p><strong>Subject:</strong> ${subject}</p>
                 <p><strong>From:</strong> ${sender}</p>
                 <p><strong>Received:</strong> ${new Date(receivedTime).toLocaleString()}</p>
                 
-                <h4>📋 Email Headers:</h4>
+                <h4>Email Headers:</h4>
                 <pre style="background-color: #f8f9fa; padding: 10px; border: 1px solid #dee2e6; font-size: 11px; overflow-x: auto; white-space: pre-wrap;">${headers}</pre>
                 
-                <h4>📄 Email Content:</h4>
+                <h4>Email Content:</h4>
                 <div style="border: 2px solid #d13438; padding: 15px; margin: 10px 0; background-color: #fff;">
                     ${body}
                 </div>
@@ -337,15 +328,15 @@
         switch(type) {
             case 'success':
                 statusMessage.className = 'status-message status-success';
-                statusMessage.textContent = '✅ Email reported and removed from inbox successfully!';
+                statusMessage.textContent = 'Email reported and removed from inbox successfully!';
                 break;
             case 'partial-success':
                 statusMessage.className = 'status-message status-success';
-                statusMessage.textContent = '✅ Email reported successfully! (Could not remove from inbox)';
+                statusMessage.textContent = 'Email reported successfully! (Could not remove from inbox)';
                 break;
             case 'error':
                 statusMessage.className = 'status-message status-error';
-                statusMessage.textContent = '❌ Failed to report email. Please try again or contact IT support.';
+                statusMessage.textContent = 'Failed to report email. Please try again or contact IT support.';
                 break;
         }
     }
@@ -355,7 +346,7 @@
         var loadingSpinner = document.getElementById('loadingSpinner');
         
         reportButton.disabled = false;
-        reportButton.textContent = '🛡️ Report as Phishing';
+        reportButton.textContent = 'Report as Phishing';
         loadingSpinner.style.display = 'none';
     }
 </script>
