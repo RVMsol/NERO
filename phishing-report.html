@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+```
+<!-- Office JavaScript API -->
+<script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+
+<!-- Fabric UI Core for consistent styling -->
+<link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/9.6.1/css/fabric.min.css">
+
+<style>
+    body {
+        margin: 0;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #fafafa;
+    }
+    
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .phishing-icon {
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 10px auto;
+        display: block;
+    }
+    
+    .title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #323130;
+        margin-bottom: 8px;
+    }
+    
+    .description {
+        font-size: 14px;
+        color: #605e5c;
+        line-height: 1.4;
+    }
+    
+    .warning-box {
+        background-color: #fff4e6;
+        border: 1px solid #ffb900;
+        border-radius: 4px;
+        padding: 15px;
+        margin: 20px 0;
+    }
+    
+    .warning-text {
+        font-size: 13px;
+        color: #8a6d3b;
+        margin-bottom: 10px;
+    }
+    
+    .action-buttons {
+        margin-top: 25px;
+    }
+    
+    .report-button {
+        width: 100%;
+        background-color: #d13438;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 12px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 10px;
+        transition: background-color 0.2s;
+    }
+    
+    .report-button:hover {
+        background-color: #a4262c;
+    }
+    
+    .report-button:disabled {
+        background-color: #c8c6c4;
+        cursor: not-allowed;
+    }
+    
+    .cancel-button {
+        width: 100%;
+        background-color: transparent;
+        color: #323130;
+        border: 1px solid #8a8886;
+        border-radius: 4px;
+        padding: 10px 20px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .cancel-button:hover {
+        background-color: #f3f2f1;
+        border-color: #323130;
+    }
+    
+    .status-message {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 13px;
+        text-align: center;
+        display: none;
+    }
+    
+    .status-success {
+        background-color: #dff6dd;
+        color: #107c10;
+        border: 1px solid #107c10;
+    }
+    
+    .status-error {
+        background-color: #fde7e9;
+        color: #a4262c;
+        border: 1px solid #a4262c;
+    }
+    
+    .loading-spinner {
+        display: none;
+        margin: 10px auto;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #d13438;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="header">
+        <!-- Custom phishing icon -->
+        <svg class="phishing-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="22" fill="#d13438" stroke="#a4262c" stroke-width="2"/>
+            <path d="M24 8l-3 12h6l-3 12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="24" cy="36" r="2" fill="white"/>
+        </svg>
+
+```
+    <div class="title">Report Phishing Email</div>
+    <div class="description">
+        This will forward the suspicious email to your security team and remove it from your inbox.
+    </div>
+</div>
+
+<div class="warning-box">
+    <div class="warning-text">
+        <strong>⚠️ Important:</strong> Only use this button if you believe this email is a phishing attempt or malicious. 
+        The email will be permanently removed from your inbox and forwarded to killphish@nero-consulting.com for analysis.
+    </div>
+</div>
+
+<div class="action-buttons">
+    <button id="reportButton" class="report-button" onclick="reportPhishingEmail()">
+        🛡️ Report as Phishing
+    </button>
+    
+    <div class="loading-spinner" id="loadingSpinner"></div>
+    
+    <button class="cancel-button" onclick="Office.context.ui.closeContainer()">
+        Cancel
+    </button>
+</div>
+
+<div id="statusMessage" class="status-message"></div>
+
+<script type="text/javascript">
+    Office.onReady(() => {
+        console.log('Office is ready');
+    });
+
+    function reportPhishingEmail() {
+        var reportButton = document.getElementById('reportButton');
+        var loadingSpinner = document.getElementById('loadingSpinner');
+        var statusMessage = document.getElementById('statusMessage');
+        
+        // Disable button and show loading
+        reportButton.disabled = true;
+        reportButton.textContent = 'Reporting...';
+        loadingSpinner.style.display = 'block';
+        statusMessage.style.display = 'none';
+        
+        // Get the current email
+        Office.context.mailbox.item.getAllInternetHeadersAsync(function(result) {
+            if (result.status === Office.AsyncResultStatus.Succeeded) {
+                var headers = result.value;
+                
+                var item = Office.context.mailbox.item;
+                var subject = item.subject;
+                var sender = item.sender ? item.sender.emailAddress : 'Unknown';
+                var receivedTime = item.dateTimeCreated;
+                
+                // Get email body
+                item.body.getAsync(Office.CoercionType.Html, function(bodyResult) {
+                    if (bodyResult.status === Office.AsyncResultStatus.Succeeded) {
+                        var emailBody = bodyResult.value;
+                        
+                        // Create the report
+                        var reportContent = createPhishingReport(subject, sender, receivedTime, emailBody, headers);
+                        
+                        // Send the report
+                        sendReport(reportContent, subject, function(success) {
+                            if (success) {
+                                // Move email to deleted items
+                                moveEmailToDeleted(function(moveSuccess) {
+                                    showStatus(moveSuccess ? 'success' : 'partial-success');
+                                    setTimeout(() => {
+                                        Office.context.ui.closeContainer();
+                                    }, 2000);
+                                });
+                            } else {
+                                showStatus('error');
+                                resetButton();
+                            }
+                        });
+                    } else {
+                        showStatus('error');
+                        resetButton();
+                    }
+                });
+            } else {
+                showStatus('error');
+                resetButton();
+            }
+        });
+    }
+
+    function createPhishingReport(subject, sender, receivedTime, body, headers) {
+        return `
+            <div style="font-family: Arial, sans-serif;">
+                <h3 style="color: #d13438;">🚨 PHISHING EMAIL REPORT</h3>
+                <p><strong>Reported by:</strong> ${Office.context.mailbox.userProfile.displayName} (${Office.context.mailbox.userProfile.emailAddress})</p>
+                <p><strong>Report Time:</strong> ${new Date().toLocaleString()}</p>
+                <hr style="margin: 20px 0;">
+                
+                <h4>📧 Original Email Details:</h4>
+                <p><strong>Subject:</strong> ${subject}</p>
+                <p><strong>From:</strong> ${sender}</p>
+                <p><strong>Received:</strong> ${new Date(receivedTime).toLocaleString()}</p>
+                
+                <h4>📋 Email Headers:</h4>
+                <pre style="background-color: #f8f9fa; padding: 10px; border: 1px solid #dee2e6; font-size: 11px; overflow-x: auto; white-space: pre-wrap;">${headers}</pre>
+                
+                <h4>📄 Email Content:</h4>
+                <div style="border: 2px solid #d13438; padding: 15px; margin: 10px 0; background-color: #fff;">
+                    ${body}
+                </div>
+                
+                <hr style="margin: 20px 0;">
+                <p style="color: #666; font-size: 12px;">
+                    This email was automatically reported using the Nero Consulting Phishing Report tool.
+                </p>
+            </div>
+        `;
+    }
+
+    function sendReport(content, originalSubject, callback) {
+        var ewsRequest = `<?xml version="1.0" encoding="utf-8"?>
+            <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                           xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"
+                           xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
+                           xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+              <soap:Header>
+                <t:RequestServerVersion Version="Exchange2013" />
+              </soap:Header>
+              <soap:Body>
+                <m:CreateItem MessageDisposition="SendAndSaveCopy">
+                  <m:Items>
+                    <t:Message>
+                      <t:Subject>[PHISHING REPORT] ${originalSubject}</t:Subject>
+                      <t:Body BodyType="HTML">${content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</t:Body>
+                      <t:ToRecipients>
+                        <t:Mailbox>
+                          <t:EmailAddress>killphish@nero-consulting.com</t:EmailAddress>
+                        </t:Mailbox>
+                      </t:ToRecipients>
+                      <t:Importance>High</t:Importance>
+                    </t:Message>
+                  </m:Items>
+                </m:CreateItem>
+              </soap:Body>
+            </soap:Envelope>`;
+
+        Office.context.mailbox.makeEwsRequestAsync(ewsRequest, function(result) {
+            callback(result.status === Office.AsyncResultStatus.Succeeded);
+        });
+    }
+
+    function moveEmailToDeleted(callback) {
+        var itemId = Office.context.mailbox.item.itemId;
+        
+        var ewsRequest = `<?xml version="1.0" encoding="utf-8"?>
+            <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                           xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"
+                           xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
+                           xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+              <soap:Header>
+                <t:RequestServerVersion Version="Exchange2013" />
+              </soap:Header>
+              <soap:Body>
+                <m:MoveItem>
+                  <m:ToFolderId>
+                    <t:DistinguishedFolderId Id="deleteditems" />
+                  </m:ToFolderId>
+                  <m:ItemIds>
+                    <t:ItemId Id="${itemId}" />
+                  </m:ItemIds>
+                </m:MoveItem>
+              </soap:Body>
+            </soap:Envelope>`;
+
+        Office.context.mailbox.makeEwsRequestAsync(ewsRequest, function(result) {
+            callback(result.status === Office.AsyncResultStatus.Succeeded);
+        });
+    }
+
+    function showStatus(type) {
+        var statusMessage = document.getElementById('statusMessage');
+        var loadingSpinner = document.getElementById('loadingSpinner');
+        
+        loadingSpinner.style.display = 'none';
+        statusMessage.style.display = 'block';
+        
+        switch(type) {
+            case 'success':
+                statusMessage.className = 'status-message status-success';
+                statusMessage.textContent = '✅ Email reported and removed from inbox successfully!';
+                break;
+            case 'partial-success':
+                statusMessage.className = 'status-message status-success';
+                statusMessage.textContent = '✅ Email reported successfully! (Could not remove from inbox)';
+                break;
+            case 'error':
+                statusMessage.className = 'status-message status-error';
+                statusMessage.textContent = '❌ Failed to report email. Please try again or contact IT support.';
+                break;
+        }
+    }
+
+    function resetButton() {
+        var reportButton = document.getElementById('reportButton');
+        var loadingSpinner = document.getElementById('loadingSpinner');
+        
+        reportButton.disabled = false;
+        reportButton.textContent = '🛡️ Report as Phishing';
+        loadingSpinner.style.display = 'none';
+    }
+</script>
+```
+
+</body>
+</html>
