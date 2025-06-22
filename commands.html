@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+</head>
+<body>
+    <script type="text/javascript">
+        Office.onReady(() => {
+            // Office is ready
+        });
+
+```
+    function reportPhishing(args) {
+        Office.context.mailbox.item.getAllInternetHeadersAsync(function(result) {
+            if (result.status === Office.AsyncResultStatus.Succeeded) {
+                var headers = result.value;
+                
+                // Get the current email details
+                var item = Office.context.mailbox.item;
+                var subject = item.subject;
+                var sender = item.sender ? item.sender.emailAddress : 'Unknown';
+                var receivedTime = item.dateTimeCreated;
+                
+                // Get email body
+                item.body.getAsync(Office.CoercionType.Html, function(bodyResult) {
+                    if (bodyResult.status === Office.AsyncResultStatus.Succeeded) {
+                        var emailBody = bodyResult.value;
+                        
+                        // Create the forwarded email content
+                        var forwardedContent = createForwardedEmail(subject, sender, receivedTime, emailBody, headers);
+                        
+                        // Create and send the report email
+                        sendPhishingReport(forwardedContent, subject, function() {
+                            // After successful report, move email to deleted items
+                            moveToDeletedItems(args);
+                        });
+                    } else {
+                        console.error('Failed to get email body:', bodyResult.error);
+                        args.completed({ allowEvent: false });
+                    }
+                });
+            } else {
+                console.error('Failed to get headers:', result.error);
+                args.completed({ allowEvent: false });
+            }
+        });
+    }
+
+    function createForwardedEmail(subject, sender, receivedTime, body, headers) {
+        var reportContent = `
+            <div style="font-family: Arial, sans-serif;">
+                <h3 style="color: #d63031;">PHISHING REPORT</h3>
+                <p><strong>Reported by:</strong> ${Office.context.mailbox.userProfile.displayName} (${Office.context.mailbox.userProfile.emailAddress})</p>
+                <p><strong>Report Time:</strong> ${new Date().toLocaleString()}</p>
+                <hr style="margin: 20px 0;">
+                
+                <h4>Original Email Details:</h4>
+                <p><strong>Subject:</strong> ${subject}</p>
+                <p><strong>From:</strong> ${sender}</p>
+                <p><strong>Received:</strong> ${receivedTime}</p>
+                
+                <h4>Email Headers:</h4>
+                <pre style="background-color: #f8f9fa; padding: 10px; border: 1px solid #dee2e6; font-size: 12px; overflow-x: auto;">${headers}</pre>
+                
+                <h4>Email Content:</h4>
+                <div style="border: 2px solid #d63031; padding: 15px; margin: 10px 0;">
+                    ${body}
+                </div>
+            </div>
+        `;
+        return reportContent;
+    }
+
+    function sendPhishingReport(content, originalSubject, callback) {
+        // Use EWS to send email
+        var ewsRequest = `<?xml version="1.0" encoding="utf-8"?>
+            <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                           xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"
+                           xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
+                           xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+              <soap:Header>
+                <t:RequestServerVersion Version="Exchange2013" />
+              </soap:Header>
+              <soap:Body>
+                <m:CreateItem MessageDisposition="SendAndSaveCopy">
+                  <m:Items>
+                    <t:Message>
+                      <t:Subject>PHISHING REPORT: ${originalSubject}</t:Subject>
+                      <t:Body BodyType="HTML">${content}</t:Body>
+                      <t:ToRecipients>
+                        <t:Mailbox>
+                          <t:EmailAddress>killphish@nero-consulting.com</t:EmailAddress>
+                        </t:Mailbox>
+                      </t:ToRecipients>
+                      <t:Importance>High</t:Importance>
+                    </t:Message>
+                  </m:Items>
+                </m:CreateItem>
+              </soap:Body>
+            </soap:Envelope>`;
+
+        Office.context.mailbox.makeEwsRequestAsync(ewsRequest, function(result) {
+            if (result.status === Office.AsyncResultStatus.Succeeded) {
+                console.log('Phishing report sent successfully');
+                showNotification('Success', 'Phishing report sent to security team');
+                if (callback) callback();
+            } else {
+                console.error('Failed to send phishing report:', result.error);
+                showNotification('Error', 'Failed to send phishing report');
+            }
+        });
+    }
+
+    function moveToDeletedItems(args) {
+        // Get the current item's ID
+        var itemId = Office.context.mailbox.item.itemId;
+        
+        // EWS request to move item to Deleted Items folder
+        var ewsRequest = `<?xml version="1.0" encoding="utf-8"?>
+            <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                           xmlns:m="http://schemas.microsoft.com/exchange/services/2006/messages"
+                           xmlns:t="http://schemas.microsoft.com/exchange/services/2006/types"
+                           xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+              <soap:Header>
+                <t:RequestServerVersion Version="Exchange2013" />
+              </soap:Header>
+              <soap:Body>
+                <m:MoveItem>
+                  <m:ToFolderId>
+                    <t:DistinguishedFolderId Id="deleteditems" />
+                  </m:ToFolderId>
+                  <m:ItemIds>
+                    <t:ItemId Id="${itemId}" />
+                  </m:ItemIds>
+                </m:MoveItem>
+              </soap:Body>
+            </soap:Envelope>`;
+
+        Office.context.mailbox.makeEwsRequestAsync(ewsRequest, function(result) {
+            if (result.status === Office.AsyncResultStatus.Succeeded) {
+                console.log('Email moved to Deleted Items');
+                showNotification('Success', 'Email reported and removed from inbox');
+            } else {
+                console.error('Failed to move email:', result.error);
+                showNotification('Warning', 'Email reported but could not be removed from inbox');
+            }
+            args.completed({ allowEvent: true });
+        });
+    }
+
+    function showNotification(title, message) {
+        Office.context.mailbox.item.notificationMessages.addAsync('phishing-report', {
+            type: 'informationalMessage',
+            message: message,
+            icon: 'icon1',
+            persistent: false
+        });
+    }
+
+    // Make function available globally
+    window.reportPhishing = reportPhishing;
+</script>
+```
+
+</body>
+</html>
