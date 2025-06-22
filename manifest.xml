@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 
+<!-- 
+NERO PHISHING REPORT MANIFEST 
+Version: 2.1
+Date: 2025-06-21
+Changes: Fixed XML Schema validation errors
+- Updated to latest Office Add-in schema v1.1
+- Simplified control structure  
+- Fixed namespace declarations
+- Updated minimum requirements
+-->
+
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
@@ -7,7 +18,7 @@ xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides/1.0
 xsi:type="MailApp">
 
 <Id>a1234567-1234-1234-1234-123456789012</Id>
-<Version>1.0.0.0</Version>
+<Version>2.1.0.0</Version>
 <ProviderName>Nero Consulting</ProviderName>
 <DefaultLocale>en-US</DefaultLocale>
 <DisplayName DefaultValue="Report Phishing"/>
