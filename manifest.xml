@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="MailApp">
-  <Id>14dc2d4e-2e5a-49a7-a6f4-df9b6c47a000</Id>
-  <Version>4.3.0.0</Version>
+  <Id>a1b2c3d4-e5f6-7890-abcd-123456789012</Id>
+  <Version>4.4.0.0</Version>
   <ProviderName>Nero Consulting</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="NERO PhishAlert"/>
