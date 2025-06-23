@@ -1,108 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
-           xmlns:mailappor="http://schemas.microsoft.com/office/mailappversionoverrides"
-           xsi:type="MailApp">
-
+<OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="MailApp">
   <Id>14dc2d4e-2e5a-49a7-a6f4-df9b6c47a000</Id>
-  <Version>4.0.0.0</Version>
+  <Version>4.2.0.0</Version>
   <ProviderName>Nero Consulting</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
   <DisplayName DefaultValue="NERO PhishAlert"/>
-  <Description DefaultValue="Report suspicious emails with one click."/>
+  <Description DefaultValue="Report suspicious emails"/>
   <IconUrl DefaultValue="https://rvmsol.github.io/NERO/assets/phishing-icon-32.png"/>
   <HighResolutionIconUrl DefaultValue="https://rvmsol.github.io/NERO/assets/phishing-icon-64.png"/>
   <SupportUrl DefaultValue="https://rvmsol.github.io/NERO"/>
-
   <AppDomains>
     <AppDomain>https://rvmsol.github.io</AppDomain>
   </AppDomains>
-
   <Hosts>
     <Host Name="Mailbox"/>
   </Hosts>
-
   <Requirements>
     <Sets>
       <Set Name="Mailbox" MinVersion="1.1"/>
     </Sets>
   </Requirements>
-
   <FormSettings>
     <Form xsi:type="ItemRead">
       <DesktopSettings>
         <SourceLocation DefaultValue="https://rvmsol.github.io/NERO/phishing-report.html"/>
-        <RequestedHeight>300</RequestedHeight>
+        <RequestedHeight>450</RequestedHeight>
+        <RequestedWidth>400</RequestedWidth>
       </DesktopSettings>
+      <TabletSettings>
+        <SourceLocation DefaultValue="https://rvmsol.github.io/NERO/phishing-report.html"/>
+        <RequestedHeight>450</RequestedHeight>
+        <RequestedWidth>400</RequestedWidth>
+      </TabletSettings>
+      <PhoneSettings>
+        <SourceLocation DefaultValue="https://rvmsol.github.io/NERO/phishing-report.html"/>
+      </PhoneSettings>
     </Form>
   </FormSettings>
-
   <Permissions>ReadWriteMailbox</Permissions>
-
   <Rule xsi:type="RuleCollection" Mode="Or">
     <Rule xsi:type="ItemIs" ItemType="Message" FormType="Read"/>
   </Rule>
-
-  <VersionOverrides xmlns="http://schemas.microsoft.com/office/mailappversionoverrides"
-                    xsi:type="VersionOverridesV1_0">
-    <Requirements>
-      <bt:Sets DefaultMinVersion="1.1">
-        <bt:Set Name="Mailbox"/>
-      </bt:Sets>
-    </Requirements>
-
-    <Hosts>
-      <Host xsi:type="MailHost">
-        <DesktopFormFactor>
-          <FunctionFile resid="Commands.Url"/>
-          <ExtensionPoint xsi:type="MessageReadCommandSurface">
-            <OfficeTab id="TabDefault">
-              <Group id="msgReadGroup">
-                <Label resid="GroupLabel"/>
-                <Control xsi:type="Button" id="msgReadOpenPaneButton">
-                  <Label resid="ButtonLabel"/>
-                  <Supertip>
-                    <Title resid="ButtonLabel"/>
-                    <Description resid="ButtonTooltip"/>
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="Icon16"/>
-                    <bt:Image size="32" resid="Icon32"/>
-                    <bt:Image size="80" resid="Icon80"/>
-                  </Icon>
-                  <Action xsi:type="ShowTaskpane">
-                    <SourceLocation resid="Taskpane.Url"/>
-                    <TaskpaneId>PhishPane</TaskpaneId>
-                  </Action>
-                </Control>
-              </Group>
-            </OfficeTab>
-          </ExtensionPoint>
-        </DesktopFormFactor>
-      </Host>
-    </Hosts>
-
-    <Resources>
-      <bt:Images>
-        <bt:Image id="Icon16" DefaultValue="https://rvmsol.github.io/NERO/assets/phishing-icon-16.png"/>
-        <bt:Image id="Icon32" DefaultValue="https://rvmsol.github.io/NERO/assets/phishing-icon-32.png"/>
-        <bt:Image id="Icon80" DefaultValue="https://rvmsol.github.io/NERO/assets/phishing-icon-80.png"/>
-      </bt:Images>
-
-      <bt:Urls>
-        <bt:Url id="Commands.Url" DefaultValue="https://rvmsol.github.io/NERO/commands.html"/>
-        <bt:Url id="Taskpane.Url" DefaultValue="https://rvmsol.github.io/NERO/phishing-report.html"/>
-      </bt:Urls>
-
-      <bt:ShortStrings>
-        <bt:String id="GroupLabel" DefaultValue="Security"/>
-        <bt:String id="ButtonLabel" DefaultValue="Report Phishing"/>
-      </bt:ShortStrings>
-
-      <bt:LongStrings>
-        <bt:String id="ButtonTooltip" DefaultValue="Click to forward and remove a suspicious email."/>
-      </bt:LongStrings>
-    </Resources>
-  </VersionOverrides>
+  <DisableEntityHighlighting>false</DisableEntityHighlighting>
 </OfficeApp>
